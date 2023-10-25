@@ -1,10 +1,10 @@
-import { Injectable } from "@angular/core";
-import { BehaviorSubject } from "rxjs";
-import { Cart, CartItem } from "../models/cart.model";
-import { MatSnackBar } from "@angular/material/snack-bar";
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+import { Cart, CartItem } from '../models/cart.model';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class CartService {
   cart = new BehaviorSubject<Cart>({ items: [] });
@@ -22,7 +22,58 @@ export class CartService {
     }
 
     this.cart.next({ items });
-    this._snackBar.open("1 item added to cart.", "ok", { duration: 3000 });
-    console.log(this.cart.value);
+    this._snackBar.open('1 item added to cart.', 'ok', { duration: 3000 });
+  }
+
+  removeQuantity(item: CartItem): void {
+    let itemForRemoal: CartItem | undefined;
+
+    let filteredItems = this.cart.value.items.map((_item) => {
+      if (_item.id === item.id) {
+        _item.quantity--;
+
+        if (_item.quantity === 0) {
+          itemForRemoal = _item;
+        }
+      }
+      return _item;
+    });
+
+    if (itemForRemoal) {
+      filteredItems = this.removeFromCart(item, false);
+    }
+
+    this.cart.next({ items: filteredItems });
+    this._snackBar.open('1 item removido do carrinho.', 'Ok', {
+      duration: 3000,
+    });
+  }
+
+  getTotal(items: Array<CartItem>) {
+    return items
+      .map((item) => item.price * item.quantity)
+      .reduce((prev, current) => prev + current, 0);
+  }
+
+  clearCart(): void {
+    this.cart.next({ items: [] });
+    this._snackBar.open('Carrinho está vázio.', 'Ok', {
+      duration: 3000,
+    });
+  }
+
+  removeFromCart(item: CartItem, update = true): Array<CartItem> {
+    const filteredItems = this.cart.value.items.filter(
+      (_item) => _item.id !== item.id,
+    );
+
+    if (update) {
+      this.cart.next({ items: filteredItems });
+      this._snackBar.open('item removido com sucesso!', 'Ok', {
+        duration: 3000,
+      });
+    }
+
+    return filteredItems;
   }
 }
