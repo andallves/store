@@ -23,7 +23,7 @@ export class FiltersComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.categoriesSubscription = this.storeService
       .getAllCategories()
-      .subscribe((_categories) => (this.categories = _categories));
+      .subscribe((response) => (this.categories = response));
   }
 
   onShowCategory(category: string): void {
